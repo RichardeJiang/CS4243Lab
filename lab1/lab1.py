@@ -8,19 +8,9 @@ def readFile(filePath):
 	return data
 
 def genMnB(matrix):
-	print len(matrix[:,0])  # To be deleted
 	M = matrix[:,2:4]
 	b = matrix[:,0:2]
-
-	# To be deleted, debugging purpose
-	print M
-	print "hello"
-	print b
-	# To be deleted
-
 	b = np.reshape(b, (len(b) * 2, 1))
-
-	print b # To be deleted
 	M = M.tolist()
 	newM = []
 	for row in M:
@@ -44,7 +34,9 @@ if (__name__=="__main__"):
 		print '\nb is: \n', b
 		a, e, r, s = la.lstsq(M, b)
 		print '\nSolved a is: \n', a
-		print M * a # To be deleted
-		print np.sqrt(la.norm(M * a - b))
-		print e
+		sumSquaredError = la.norm(M * a - b) ** 2
+		print '\nComputed sum squared error is: \n', sumSquaredError
+		print '\ne is: \n', e
+	else:
+		print 'No data.txt file found in directory!\n'
 	pass
