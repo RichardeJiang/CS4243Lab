@@ -18,8 +18,7 @@ def genMnB(matrix):
 		newM.append(topRow)
 		botRow = [0,0,0] + row +[1]
 		newM.append(botRow)
-	M = np.asarray(newM)
-	M = np.matrix(M)
+	M = np.asmatrix(newM)
 	b = np.matrix(b)
 	return M, b
 
