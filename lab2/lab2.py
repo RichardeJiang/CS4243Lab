@@ -19,9 +19,9 @@ def convertBGRToHSV(picPath, title):
 			B = cell[0]
 			G = cell[1]
 			R = cell[2]
-			Bp = B / 255
-			Gp = G / 255
-			Rp = R / 255
+			Bp = float(B) / 255
+			Gp = float(G) / 255
+			Rp = float(R) / 255
 			Cmax = max (Bp, Gp, Rp)
 			Cmin = min (Bp, Gp, Rp)
 			delta = Cmax - Cmin
@@ -43,19 +43,54 @@ def convertBGRToHSV(picPath, title):
 			V = Cmax
 
 			HArray[rowIndex][colIndex] = H
-			SArray[rowIndex][colIndex] = S
-			VArray[rowIndex][colIndex] = V
+			SArray[rowIndex][colIndex] = S * 255  #from cvtColor() doc, it should be 255*S
+			VArray[rowIndex][colIndex] = V * 255  #otherwise the output will be dark
 
 			colIndex += 1
 
 		rowIndex += 1
 	
-	cv2.imwrite('output/' + '_hue.jpg', HArray)
-	cv2.imwrite('output/' + '_saturation.jpg', SArray)
-	cv2.imwrite('output/' + '_value.jpg', VArray)
+	cv2.imwrite('output/' + title + '_hue.jpg', HArray)
+	cv2.imwrite('output/' + title + '_saturation.jpg', SArray)
+	cv2.imwrite('output/' + title + '_brightness.jpg', VArray)
 	return
 
-def convertHSVToBGR(picPath, title):
+def convertHSVToBGR(title):
+	fileList = os.listdir('output/')
+	try:
+		HArray = cv2.imread('output/' + title + '_hue.jpg')
+		SArray = cv2.imread('output/' + title + '_saturation.jpg')
+		VArray = cv2.imread('output/' + title + '_brightness.jpg')
+	except:
+		print 'Target files not found in current directory!\n'
+	else:
+		rows = len(HArray)
+		cols = len(HArray[0])
+		resultArray = np.ndarray(shape=(rows, cols, 3))
+		for row in range(0, rows):
+			for col in range(0, cols):
+				H = float(HArray[row][col][0])
+				S = float(SArray[row][col][0]) / 255
+				V = float(VArray[row][col][0]) / 255
+				C = S * V
+				X = C * (1 - abs((H / 60) % 2 - 1))
+				m = V - C
+				if (H in range(0, 60)):
+					Rp, Gp, Bp = C, X, 0
+				elif (H in range(60, 120)):
+					Rp, Gp, Bp = X, C, 0
+				elif (H in range(120, 180)):
+					Rp, Gp, Bp = 0, C, X
+				elif (H in range(180, 240)):
+					Rp, Gp, Bp = 0, X, C
+				elif (H in range(240, 300)):
+					Rp, Gp, Bp = X, 0, C
+				else:
+					Rp, Gp, Bp = C, 0, X
+				resultArray[row][col][0] = (Bp + m) * 255
+				resultArray[row][col][1] = (Gp + m) * 255
+				resultArray[row][col][2] = (Rp + m) * 255
+		cv2.imwrite('output/' + title + '_hsv2rgb.jpg', resultArray)
 	return
 
 def writeImage(picPath):
@@ -73,8 +108,7 @@ if (__name__=='__main__'):
 		for picName in picList:
 			title = picName.split('.')[0]
 			convertBGRToHSV('lab2_pictures/' + picName, title)
-			convertHSVToBGR('lab2_pictures/' + picName, title)
-			break
+			convertHSVToBGR(title)
 
 	else:
 		print 'No picture folder found in current directory!\n'

@@ -7,8 +7,10 @@ def convertBGRToHSV(picPath):
 	#print len(image) #vertical pixels
 	#print len(image[0]) #horizontal pixels
 	#print len(image[0][0]) #BGR
+	print image
 	hsv = cv2.cvtColor(image, cv2.cv.CV_BGR2HSV)
 	print hsv
+	cv2.imwrite('test.jpg', hsv)
 	return
 
 def convertHSVToBGR(picPath):
