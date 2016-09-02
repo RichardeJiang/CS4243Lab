@@ -20,6 +20,11 @@
 *.tar
 *.zip
 
+# Pictures #
+*.jpg
+*.png
+*.jpeg
+
 # Logs and databases #
 ######################
 *.log
