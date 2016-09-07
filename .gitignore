@@ -20,6 +20,13 @@
 *.tar
 *.zip
 
+# Pdf files #
+*.pdf
+
+# Word documents #
+*.doc
+*.docx
+
 # Pictures #
 *.jpg
 *.png
