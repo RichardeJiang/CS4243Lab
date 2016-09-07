@@ -13,29 +13,29 @@ def convertBGRToHSV(title):
 		#print len(image) #vertical pixels
 		#print len(image[0]) #horizontal pixels
 		#print len(image[0][0]) #BGR
-		HArray = np.ndarray(shape=(len(image), len(image[0])), dtype=np.uint8)
-		SArray = np.ndarray(shape=(len(image), len(image[0])), dtype=np.uint8)
-		VArray = np.ndarray(shape=(len(image), len(image[0])), dtype=np.uint8)
-
 		rows = len(image)
 		cols = len(image[0])
+
+		HArray = np.zeros(shape=(rows, cols))
+		SArray = np.zeros(shape=(rows, cols))
+		VArray = np.zeros(shape=(rows, cols))
+
 		for row in range(0, rows):
 			for col in range(0, cols):
 				B = image[row][col][0]
 				G = image[row][col][1]
 				R = image[row][col][2]
-				Bp = float(B) / 255.0
-				Gp = float(G) / 255.0
-				Rp = float(R) / 255.0
+				Bp = np.float(B) / 255.0
+				Gp = np.float(G) / 255.0
+				Rp = np.float(R) / 255.0
 				Cmax = max (Rp, Gp, Bp)
 				Cmin = min (Rp, Gp, Bp)
-				delta = Cmax - Cmin
+				delta = np.float(Cmax - Cmin)
 
 				if (delta == 0):
 					H = 0
 				elif (Cmax == Rp):
-					H = (int((Gp - Bp) / delta) % 6) * 60
-					#H = ((Gp - Bp) / delta) * 60
+					H = (((Gp - Bp) / delta) % 6) * 60
 				elif (Cmax == Gp):
 					H = (((Bp - Rp) / delta) + 2) * 60
 				else:
@@ -50,10 +50,10 @@ def convertBGRToHSV(title):
 
 				# if (H < 0):
 				# 	H += 360
-				#HArray[row][col] = int(H / 360.0 * 255)
-				HArray[row][col] = np.uint8(H / 2)
-				SArray[row][col] = np.uint8(S * 255)  #from cvtColor() doc, it should be 255*S
-				VArray[row][col] = np.uint8(V * 255)  #otherwise the output will be dark
+				HArray[row][col] = np.round(H / 360.0 * 255).astype('uint8')
+				#HArray[row][col] = np.uint8(H / 2)
+				SArray[row][col] = np.round(S * 255).astype('uint8')  #from cvtColor() doc, it should be 255*S
+				VArray[row][col] = np.round(V * 255).astype('uint8')  #otherwise the output will be dark
 		
 		cv2.imwrite('output/' + title + '_hue.jpg', HArray)
 		cv2.imwrite('output/' + title + '_saturation.jpg', SArray)
@@ -62,9 +62,9 @@ def convertBGRToHSV(title):
 
 def convertHSVToBGR(title):
 	try:
-		HArray = cv2.imread('output/' + title + '_hue.jpg')
-		SArray = cv2.imread('output/' + title + '_saturation.jpg')
-		VArray = cv2.imread('output/' + title + '_brightness.jpg')
+		HArray = cv2.imread('output/' + title + '_hue.jpg', 0)
+		SArray = cv2.imread('output/' + title + '_saturation.jpg', 0)
+		VArray = cv2.imread('output/' + title + '_brightness.jpg', 0)
 	except:
 		print 'Target files not found in current directory!\n'
 	else:
@@ -75,21 +75,20 @@ def convertHSVToBGR(title):
 def convertHSVToBGRCalculation(HArray, SArray, VArray):
 	rows = len(HArray)
 	cols = len(HArray[0])
-	resultArray = np.ndarray(shape=(rows, cols, 3), dtype=np.uint8)
+	resultArray = np.zeros(shape=(rows, cols, 3))
 	for row in range(0, rows):
 		for col in range(0, cols):
-			#H = float(HArray[row][col][0]) * 360 / 255 #/ 255 * 360
 			#H = float(HArray[row][col][0]) * 2
-			H = HArray[row][col][0] * 2
-			S = float(SArray[row][col][0]) / 255
-			V = float(VArray[row][col][0]) / 255
+			H = np.float(HArray[row][col]) / 255.0 * 360
+			S = np.float(SArray[row][col]) / 255.0
+			V = np.float(VArray[row][col]) / 255.0
 
-			#H = int(H)
 
 			C = V * S
-			X = C * (1 - abs(int(H / 60) % 2 - 1))
-			#X = C * (1 - abs((H / 60) % 2))
+			X = C * (1 - abs((H / 60.0) % 2 - 1))
 			m = V - C
+
+			H = np.int(H)
 
 			if (H in range(0, 60)):
 				Rp, Gp, Bp = C, X, 0
@@ -104,17 +103,17 @@ def convertHSVToBGRCalculation(HArray, SArray, VArray):
 			else:
 				Rp, Gp, Bp = C, 0, X
 
-			resultArray[row][col][0] = np.uint8((Bp + m) * 255)
-			resultArray[row][col][1] = np.uint8((Gp + m) * 255)
-			resultArray[row][col][2] = np.uint8((Rp + m) * 255)
+			resultArray[row][col][0] = np.round((Bp + m) * 255).astype('uint8')
+			resultArray[row][col][1] = np.round((Gp + m) * 255).astype('uint8')
+			resultArray[row][col][2] = np.round((Rp + m) * 255).astype('uint8')
 
 	return resultArray
 
 def histogramEq(title):
 	try:
-		HArray = cv2.imread('output/' + title + '_hue.jpg')
-		SArray = cv2.imread('output/' + title + '_saturation.jpg')
-		VArray = cv2.imread('output/' + title + '_brightness.jpg')
+		HArray = cv2.imread('output/' + title + '_hue.jpg', 0)
+		SArray = cv2.imread('output/' + title + '_saturation.jpg', 0)
+		VArray = cv2.imread('output/' + title + '_brightness.jpg', 0)
 	except:
 		print 'Target files not found in current directory!\n'
 	else:
@@ -122,21 +121,24 @@ def histogramEq(title):
 		sumPlot = np.zeros(256)
 		rows = len(VArray)
 		cols = len(VArray[0])
-		newVArray = np.ndarray(shape=(rows, cols, 1)) #3D array is required because imwrite will convert to 3D
+		newVArray = np.zeros(shape=(rows, cols))
 		sumOfHis = 0
 
 		for row in range(0, rows):
 			for col in range(0, cols):
-				histogram[int(VArray[row][col][0])] += 1
+				histogram[VArray[row][col]] += 1
 
 		for index in range(0, 256):
 			sumOfHis += histogram[index]
 			sumPlot[index] = sumOfHis
 
-		unit = float(sumOfHis) / 256
+		unit = float(sumOfHis) / 256.0
 		for row in range(0, rows):
 			for col in range(0, cols):
-				newVArray[row][col][0] = math.floor(sumPlot[int(VArray[row][col][0])] / unit)
+				newVArray[row][col] = round(sumPlot[VArray[row][col]] / unit)
+
+		# Specify uint8 at the end (after clip), otherwise in the middle there will be overflow already
+		newVArray = np.clip(newVArray, 0, 255).astype('uint8')
 		
 		resultArray = convertHSVToBGRCalculation(HArray, SArray, newVArray)
 		cv2.imwrite('output/' + title + '_histeq.jpg', resultArray)
