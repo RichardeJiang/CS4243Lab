@@ -58,6 +58,27 @@ def edgeThinning(image, title):
 
 	return
 
+def edgeThinningTwo(image, title):
+	'''for testing purpose, see modifying the original array '''
+	rows = len(image)
+	cols = len(image[0])
+	for row in range(1, rows-1):
+		for col in range(1, cols-1):
+			# currWindow = image[row-1:row+2, col-1:col+2]
+			# if (currWindow[1][1] == np.amax(currWindow[1])) or (currWindow[1][1] == np.amax(currWindow[:, 1])):
+			# 	pass
+			# else:
+			# 	image[row][col] = 0
+			if (
+				(image[row][col] < image[row-1][col] or image[row][col] < image[row+1][col]) or
+				(image[row][col] < image[row][col-1] or image[row][col] < image[row][col+1])
+				):
+				image[row][col] = 0
+
+	cv2.imwrite('thinned_sobel_result_' + title + '.jpg', image)
+
+	return
+
 if (__name__=="__main__"):
 	fileList = os.listdir('.')
 	# for fileName in fileList:
@@ -70,5 +91,5 @@ if (__name__=="__main__"):
 	title = 'example'
 	image = cv2.imread('example.jpg', 0)
 	sobelResult = edgeDetection(image, title)
-	edgeThinning(sobelResult, title)
+	edgeThinningTwo(sobelResult, title)
 	pass
