@@ -56,44 +56,23 @@ def edgeThinning(image, title):
 			currWindow = image[row-1:row+2, col-1:col+2]
 			if (currWindow[1][1] == np.amax(currWindow[1])) or (currWindow[1][1] == np.amax(currWindow[:, 1])):
 				result[row][col] = currWindow[1][1]
-			# 	pass
-			# else:
-			# 	image[row][col] = 0
-			# if (image[row][col] == np.amax(image[row])) or (image[row][col] == np.amax(image[:, col])):
-			# 	result[row][col] = image[row][col]
 	result = result.astype('uint8')
 
 	cv2.imwrite('thinned_sobel_result_' + title + '.jpg', result)
 
 	return
 
-def edgeThinningTwo(image, title):
-	'''for testing purpose, see modifying the original array '''
-	rows = len(image)
-	cols = len(image[0])
-	for row in range(1, rows-1):
-		for col in range(1, cols-1):
-			if (
-				(image[row][col] < image[row-1][col] or image[row][col] < image[row+1][col]) and
-				(image[row][col] < image[row][col-1] or image[row][col] < image[row][col+1])
-				):
-				image[row][col] = 0
-
-	cv2.imwrite('thinned_sobel_result_' + title + '.jpg', image)
-
-	return
-
 if (__name__=="__main__"):
 	fileList = os.listdir('.')
-	# for fileName in fileList:
-	# 	if fileName.endswith('.jpg') and ('test' in fileName):
-	# 		title = fileName.split('.')[0]
-	# 		image = cv2.imread(fileName, 0)
-	# 		edgeDetection(image, title)
-	# 		edgeThinning(image, title)
+	for fileName in fileList:
+		if fileName.endswith('.jpg') and ('test' in fileName):
+			title = fileName.split('.')[0]
+			image = cv2.imread(fileName, 0)
+			sobelResult = edgeDetection(image, title)
+			edgeThinning(sobelResult, title)
 
-	title = 'example'
-	image = cv2.imread('example.jpg', 0)
-	sobelResult = edgeDetection(image, title)
-	edgeThinning(sobelResult, title)
+	# title = 'example'
+	# image = cv2.imread('example.jpg', 0)
+	# sobelResult = edgeDetection(image, title)
+	# edgeThinningTwo(sobelResult, title)
 	pass
