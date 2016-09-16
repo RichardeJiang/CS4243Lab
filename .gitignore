@@ -32,6 +32,11 @@
 *.png
 *.jpeg
 
+# Folders #
+A0119401U_JiangShenhao_Lab2/
+A0119401U_JiangShenhao_Lab3/
+A0119401U_JiangShenhao_Lab4/
+
 # Logs and databases #
 ######################
 *.log
