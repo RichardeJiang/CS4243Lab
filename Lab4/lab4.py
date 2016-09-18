@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 def gauss_kernels(size, sigma=1.0):
 	## return a 2d gaussian gauss_kernels
@@ -40,14 +39,18 @@ def convolve(image, ff):
 	return result
 
 if (__name__ == "__main__"):
-	SobelKernelV = np.array([(-1, -2, -1), (0, 0, 0), (1, 2, 1)])
-	SobelKernelH = np.array([(1, 0, -1), (2, 0, -2), (1, 0, -1)])
+	SobelKernelH = np.array([(-1, -2, -1), (0, 0, 0), (1, 2, 1)])
+	SobelKernelV = np.array([(1, 0, -1), (2, 0, -2), (1, 0, -1)])
 	k = 0.06
 
 	fileList = os.listdir('.')
 	for fileName in fileList:
-		if fileName.endswith('.jpg'):
+		if fileName.endswith('.jpg') and 'corners' not in fileName:
+			title = fileName.split('.')[0]
 			image = cv2.imread(fileName, 0)
+
+			rows = len(image)
+			cols = len(image[0])
 			gx = convolve(image, SobelKernelH)
 			gy = convolve(image, SobelKernelV)
 
@@ -66,9 +69,11 @@ if (__name__ == "__main__"):
 			W_yy = convolve(I_yy, Gauss_kernel)
 
 			print W_xx.max()
+			print W_xy.max()
+			print W_yy.max()
 
-			rows = len(W_xx)
-			cols = len(W_xx[0])
+			# rows = len(W_xx)
+			# cols = len(W_xx[0])
 			responses = np.zeros(W_xx.shape)
 			for row in range(10, rows, 10):
 				for col in range(10, cols, 10):
@@ -91,7 +96,7 @@ if (__name__ == "__main__"):
 			#maxResponse = np.amax(responses)
 			maxResponse = responses.max()
 			print maxResponse
-			threshold = np.float(maxResponse * 0.90)
+			threshold = np.float(maxResponse * 0.8)
 			print threshold
 			qualifiedX = []
 			qualifiedY = []
@@ -112,8 +117,12 @@ if (__name__ == "__main__"):
 			fig = plt.figure()
 			plt.imshow(image, cmap = 'gray')
 			plt.hold(True)
-			plt.scatter(qualifiedX, qualifiedY, s = 9, marker = 's', color='blue', alpha = .4)
+			plt.scatter(qualifiedY, qualifiedX, s = 81, marker = 's', color='blue', alpha = .4)
+			#plt.show()
+
+			plt.savefig(title + '_corners.jpg')
 			plt.show()
+			plt.close()
 
 			#plt.close()
-			break
+			#break
