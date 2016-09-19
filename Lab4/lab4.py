@@ -31,11 +31,6 @@ def convolve(image, ff):
 			strength = np.sum(currWindow * ffConvolution)
 			result[row][col] = strength
 
-	# result = np.sqrt(result)
-	# maxValue = np.amax(result)
-	# result *= (255.0 / np.float(maxValue))
-	# result = result.astype('uint8')
-
 	return result
 
 if (__name__ == "__main__"):
@@ -72,8 +67,6 @@ if (__name__ == "__main__"):
 			print W_xy.max()
 			print W_yy.max()
 
-			# rows = len(W_xx)
-			# cols = len(W_xx[0])
 			responses = np.zeros(W_xx.shape)
 			for row in range(10, rows, 10):
 				for col in range(10, cols, 10):
@@ -87,9 +80,7 @@ if (__name__ == "__main__"):
 						W[1][1] = W_yy[row][col]
 						W = np.asmatrix(W)
 						detW = np.linalg.det(W)
-						#print detW
 						traceW = np.trace(W)
-						#print traceW
 						response = detW - k * traceW * traceW
 						responses[row][col] = response
 
@@ -118,11 +109,9 @@ if (__name__ == "__main__"):
 			plt.imshow(image, cmap = 'gray')
 			plt.hold(True)
 			plt.scatter(qualifiedY, qualifiedX, s = 81, marker = 's', color='blue', alpha = .4)
-			#plt.show()
 
 			plt.savefig(title + '_corners.jpg')
-			plt.show()
+			#plt.show()
 			plt.close()
-
-			#plt.close()
+			
 			#break
