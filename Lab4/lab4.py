@@ -49,27 +49,21 @@ if (__name__ == "__main__"):
 			gx = convolve(image, SobelKernelH)
 			gy = convolve(image, SobelKernelV)
 
-			print gx.max()
-
 			I_xx = gx * gx
 			I_xy = gx * gy
 			I_yy = gy * gy
 			
 			Gauss_kernel = gauss_kernels(3)
 
-			print I_xx.max()
-
 			W_xx = convolve(I_xx, Gauss_kernel)
 			W_xy = convolve(I_xy, Gauss_kernel)
 			W_yy = convolve(I_yy, Gauss_kernel)
 
-			print W_xx.max()
-			print W_xy.max()
-			print W_yy.max()
-
 			responses = np.zeros(W_xx.shape)
-			for row in range(10, rows, 10):
-				for col in range(10, cols, 10):
+			# for row in range(10, rows-1, 10):
+			# 	for col in range(10, cols-1, 10):
+			for row in range(1, rows - 1):
+				for col in range(1, cols - 1):
 					if (row == (rows - 1)) or (col == (cols - 1)):
 						pass
 					else:
@@ -78,21 +72,23 @@ if (__name__ == "__main__"):
 						W[0][1] = W_xy[row][col]
 						W[1][0] = W_xy[row][col]
 						W[1][1] = W_yy[row][col]
-						W = np.asmatrix(W)
-						detW = np.linalg.det(W)
-						traceW = np.trace(W)
+						#W = np.asmatrix(W)
+						#detW = np.linalg.det(W)
+						detW = W[0][0]*W[1][1] - W[0][1]*W[1][0]
+						#traceW = np.trace(W)
+						traceW = W[0][0] + W[1][1]
 						response = detW - k * traceW * traceW
 						responses[row][col] = response
 
-			#maxResponse = np.amax(responses)
 			maxResponse = responses.max()
-			print maxResponse
-			threshold = np.float(maxResponse * 0.8)
-			print threshold
+			# threshold = np.float(maxResponse * 0.9)
+			threshold = np.float(maxResponse * 0.1)
 			qualifiedX = []
 			qualifiedY = []
-			for row in range(10, rows, 10):
-				for col in range(10, cols, 10):
+			# for row in range(10, rows-1, 10):
+			# 	for col in range(10, cols-1, 10):
+			for row in range(1, rows - 1):
+				for col in range(1, cols - 1):
 					if (row == (rows - 1)) or (col == (cols - 1)):
 						pass
 					else:
@@ -102,16 +98,13 @@ if (__name__ == "__main__"):
 			qualifiedX = np.asarray(qualifiedX)
 			qualifiedY = np.asarray(qualifiedY)
 
-			print qualifiedX
-			print qualifiedY
-
 			fig = plt.figure()
 			plt.imshow(image, cmap = 'gray')
 			plt.hold(True)
-			plt.scatter(qualifiedY, qualifiedX, s = 81, marker = 's', color='blue', alpha = .4)
+			plt.scatter(qualifiedY, qualifiedX, s = 81, marker = 's', color='blue', facecolors = 'none')
 
 			plt.savefig(title + '_corners.jpg')
 			#plt.show()
 			plt.close()
-			
-			#break
+
+	pass
