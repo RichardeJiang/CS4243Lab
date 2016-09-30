@@ -32,6 +32,9 @@
 *.png
 *.jpeg
 
+# Movies #
+*.mp4
+
 # Folders #
 A0119401U_JiangShenhao_Lab2/
 A0119401U_JiangShenhao_Lab3/
