@@ -18,6 +18,10 @@ def computeQnQp(theta):
 	qp = [np.cos(theta / 2.0)] + [-element for element in vq.tolist()]
 	return q, qp
 
+def normalizeVector(q):
+	size = np.sqrt(reduce(lambda x, y: x**2 + y**2, q))
+	return [ele / size for ele in q]
+
 def quat2rot(q):
 	rotationM = []
 	row0 = [q[0]**2 + q[1]**2 - q[2]**2 - q[3]**2, 2*(q[1]*q[2] - q[0]*q[3]), 2*(q[1]*q[3] + q[0]*q[2])]
@@ -69,18 +73,18 @@ if (__name__ == "__main__"):
 	### part 1.3 ###
 	theta = 0
 	q, qp = computeQnQp(theta)
-	quatmat_1 = quat2rot(q)
+	quatmat_1 = quat2rot(normalizeVector(q))
 	print quatmat_1
 
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
-	quatmat_2 = quat2rot(q)
+	quatmat_2 = quat2rot(normalizeVector(q))
 
 	theta = theta * 2
 	q, qp = computeQnQp(theta)
-	quatmat_3 = quat2rot(q)
+	quatmat_3 = quat2rot(normalizeVector(q))
 
 	theta = theta * 1.5
 	q, qp = computeQnQp(theta)
-	quatmat_4 = quat2rot(q)
+	quatmat_4 = quat2rot(normalizeVector(q))
 	pass
