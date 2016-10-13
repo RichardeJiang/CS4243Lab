@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 def quatmult(q1, q2):
 	out = [0, 0, 0, 0]
@@ -30,6 +31,21 @@ def quat2rot(q):
 	rotationM = [row0, row1, row2]
 	return np.matrix(rotationM)
 
+def projection(type, sp, tf, cf):
+	u0, v0 = 0
+	bu, bv = 1
+	f = 1
+	if type == 'perspective':
+		ufp = f * np.dot(np.asarray(sp - tf), cf[0]) * bu / np.dot(np.asarray(sp - tf), cf[2]) + u0
+		vfp = f * np.dot(np.asarray(sp - tf), cf[1]) * bu / np.dot(np.asarray(sp - tf), cf[2]) + v0
+	else:
+		ufp = f * np.dot(np.asarray(sp - tf), cf[0]) * bu + u0
+		vfp = f * np.dot(np.asarray(sp - tf), cf[1]) * bu + v0
+	return ufp, vfp
+
+def drawProjections():
+	return
+
 if (__name__ == "__main__"):
 
 	### part 1.1 ###
@@ -52,39 +68,64 @@ if (__name__ == "__main__"):
 	q, qp = computeQnQp(theta)
 	initialPos = [0] + initialPos
 
-	point2 = quatmult(q, initialPos)
-	point2 = quatmult(point2, qp)
-	point2[0] = 0
+	frame2 = quatmult(q, initialPos)
+	frame2 = quatmult(frame2, qp)
+	frame2[0] = 0
 	theta = theta * 2
 	q, qp = computeQnQp(theta)
 
-	point3 = quatmult(q, initialPos)
-	point3 = quatmult(point3, qp)
-	point3[0] = 0
+	frame3 = quatmult(q, initialPos)
+	frame3 = quatmult(frame3, qp)
+	frame3[0] = 0
 	theta = theta * 1.5
 	q, qp = computeQnQp(theta)
 
-	point4 = quatmult(q, initialPos)
-	point4 = quatmult(point4, qp)
-	point4[0] = 0
+	frame4 = quatmult(q, initialPos)
+	frame4 = quatmult(frame4, qp)
+	frame4[0] = 0
 
-	print point2, point3, point4
+	print frame2, frame3, frame4
 
 	### part 1.3 ###
-	theta = 0
-	q, qp = computeQnQp(theta)
-	quatmat_1 = quat2rot(normalizeVector(q))
-	print quatmat_1
-
+	### this part is not implemented correctly according to pdf requirement ###
+	quatmat_1 = np.array([(1.0, 0, 0), (0, 1.0, 0), (0, 0, 1.0)])
+	quatmat_1 = np.matrix(quatmat_1)
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
-	quatmat_2 = quat2rot(normalizeVector(q))
+	print quatmat_1
+	rotationMatrix = quat2rot(normalizeVector(q))
 
-	theta = theta * 2
-	q, qp = computeQnQp(theta)
-	quatmat_3 = quat2rot(normalizeVector(q))
+	quatmat_2 = rotationMatrix * quatmat_1
+	quatmat_3 = rotationMatrix * quatmat_2
+	quatmat_4 = rotationMatrix * quatmat_3
 
-	theta = theta * 1.5
-	q, qp = computeQnQp(theta)
-	quatmat_4 = quat2rot(normalizeVector(q))
+
+	# theta = 0
+	# q, qp = computeQnQp(theta)
+	# quatmat_1 = quat2rot(normalizeVector(q))
+	# print quatmat_1
+
+	# theta = np.pi / 6.0
+	# q, qp = computeQnQp(theta)
+	# quatmat_2 = quat2rot(normalizeVector(q))
+
+	# theta = theta * 2
+	# q, qp = computeQnQp(theta)
+	# quatmat_3 = quat2rot(normalizeVector(q))
+
+	# theta = theta * 1.5
+	# q, qp = computeQnQp(theta)
+	# quatmat_4 = quat2rot(normalizeVector(q))
+
+	### part 2 ###
+	for point in pts:
+		projection('perspective', point, initialPos[1:])
+		projection('perspective', point, frame2[1:])
+		projection('perspective', point, frame3[1:])
+		projection('perspective', point, frame4[1:])
+
+		projection('orthographic', point, initialPos[1:])
+		projection('orthographic', point, frame2[1:])
+		projection('orthographic', point, frame3[1:])
+		projection('orthographic', point, frame4[1:])
 	pass
