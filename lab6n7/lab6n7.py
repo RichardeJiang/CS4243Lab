@@ -32,15 +32,19 @@ def quat2rot(q):
 	return np.matrix(rotationM)
 
 def projection(type, sp, tf, cf):
-	u0, v0 = 0
-	bu, bv = 1
-	f = 1
+	u0 = 0
+	v0 = 0
+	bu = 1.0
+	bv = 1.0
+	f = 1.0
+	sp = np.asarray(sp).reshape(3, 1)
+	tf = np.asarray(tf).reshape(3, 1)
 	if type == 'perspective':
-		ufp = f * np.dot(np.asarray(sp - tf), cf[0]) * bu / np.dot(np.asarray(sp - tf), cf[2]) + u0
-		vfp = f * np.dot(np.asarray(sp - tf), cf[1]) * bu / np.dot(np.asarray(sp - tf), cf[2]) + v0
+		ufp = f * np.dot(sp - tf, cf[0]) * bu / np.dot(sp - tf, cf[2]) + u0
+		vfp = f * np.dot(sp - tf, cf[1]) * bu / np.dot(sp - tf, cf[2]) + v0
 	else:
-		ufp = f * np.dot(np.asarray(sp - tf), cf[0]) * bu + u0
-		vfp = f * np.dot(np.asarray(sp - tf), cf[1]) * bu + v0
+		ufp = f * np.dot(sp - tf, cf[0]) * bu + u0
+		vfp = f * np.dot(sp - tf, cf[1]) * bu + v0
 	return ufp, vfp
 
 def drawProjections():
@@ -119,13 +123,13 @@ if (__name__ == "__main__"):
 
 	### part 2 ###
 	for point in pts:
-		projection('perspective', point, initialPos[1:])
-		projection('perspective', point, frame2[1:])
-		projection('perspective', point, frame3[1:])
-		projection('perspective', point, frame4[1:])
+		projection('perspective', point, initialPos[1:], quatmat_1)
+		projection('perspective', point, frame2[1:], quatmat_2)
+		projection('perspective', point, frame3[1:], quatmat_3)
+		projection('perspective', point, frame4[1:], quatmat_4)
 
-		projection('orthographic', point, initialPos[1:])
-		projection('orthographic', point, frame2[1:])
-		projection('orthographic', point, frame3[1:])
-		projection('orthographic', point, frame4[1:])
+		projection('orthographic', point, initialPos[1:], quatmat_1)
+		projection('orthographic', point, frame2[1:], quatmat_2)
+		projection('orthographic', point, frame3[1:], quatmat_3)
+		projection('orthographic', point, frame4[1:], quatmat_4)
 	pass
