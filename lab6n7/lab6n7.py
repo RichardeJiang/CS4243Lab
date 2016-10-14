@@ -42,9 +42,6 @@ def projection(type, sp, tf, cf):
 	# tf = np.asarray(tf).reshape(3, 1)
 	sp = np.asarray(sp)
 	tf = np.asarray(tf)
-	# print sp
-	# print tf
-	# print cf[0]
 	if type == 'perspective':
 		# ufp = f * np.dot(sp - tf, cf[0].T) * bu / np.dot(sp - tf, cf[2].T) + u0
 		# vfp = f * np.dot(sp - tf, cf[1].T) * bu / np.dot(sp - tf, cf[2].T) + v0
@@ -63,14 +60,14 @@ def drawProjections(XValueSet, YValueSet, identifier):
 
 	for index in range(0, len(XValueSet)):
 		sub = fig.add_subplot(2, 2, index+1)
-		print XValueSet[index]
-		print YValueSet[index]
 		sub.plot(XValueSet[index], YValueSet[index], 'ro')
 	plt.savefig(identifier + '.jpg')
 	plt.close()
 	return
 
 def computeHomography(pPoints, cPoints):
+	print 'pPoint is: ', pPoints
+	print 'cPoint is: ', cPoints
 	b = [0] * (len(pPoints) * 2)
 	M = []
 	for index in range(0, len(pPoints)):
@@ -126,29 +123,18 @@ if (__name__ == "__main__"):
 	frame4 = quatmult(frame4, qp)
 	frame4[0] = 0
 
-	print frame2, frame3, frame4
-
 	### part 1.3 ###
 	### this part is not implemented correctly according to pdf requirement ###
 	quatmat_1 = np.array([(1.0, 0, 0), (0, 1.0, 0), (0, 0, 1.0)])
 	quatmat_1 = np.matrix(quatmat_1)
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
-	print quatmat_1
-	print q
-	print normalizeVector(q)
 	#rotationMatrix = quat2rot(normalizeVector(q))
 	rotationMatrix = quat2rot(q)
-
-	print rotationMatrix
 
 	quatmat_2 = np.dot(rotationMatrix, quatmat_1)
 	quatmat_3 = np.dot(rotationMatrix, quatmat_2)
 	quatmat_4 = np.dot(rotationMatrix, quatmat_3)
-
-	print quatmat_2
-	print quatmat_3
-	print quatmat_4
 
 
 	# theta = 0
@@ -190,12 +176,8 @@ if (__name__ == "__main__"):
 		u[1], v[1] = projection('perspective', point, frame2[1:], quatmat_2)
 		u[2], v[2] = projection('perspective', point, frame3[1:], quatmat_3)
 		u[3], v[3] = projection('perspective', point, frame4[1:], quatmat_4)
-		print 'u is: ', u
-		print 'v is: ', v
 		perspectivePlotX.append(u)
 		perspectivePlotY.append(v)
-		print 'curr X is: ', perspectivePlotX
-		print 'curr Y is: ', perspectivePlotY
 
 		u[0], v[0] = projection('orthographic', point, initialPos[1:], quatmat_1)
 		u[1], v[1] = projection('orthographic', point, frame2[1:], quatmat_2)
@@ -203,9 +185,6 @@ if (__name__ == "__main__"):
 		u[3], v[3] = projection('orthographic', point, frame4[1:], quatmat_4)
 		orthographicPlotX.append(u)
 		orthographicPlotY.append(v)
-
-	print 'X value is: ', perspectivePlotX
-	print 'Y value is: ', perspectivePlotY
 
 	perspectivePlotX = np.asarray(perspectivePlotX).T.tolist()
 	perspectivePlotY = np.asarray(perspectivePlotY).T.tolist()
