@@ -80,9 +80,23 @@ def computeHomography(pPoints, cPoints):
 	b = np.asmatrix(b).reshape(len(b), 1)
 	M = np.asmatrix(M)
 	print 'M is: ', M
-	a, e, r, s = la.lstsq(M, b)
+	np.savetxt('M.txt', M)
+	# a, e, r, s = la.lstsq(M, b)
 	#a = la.solve(M, b) cannot be used here, as solve can only be used for square matrix M
-	return a.reshape(3, 3)
+	u, s, vt = la.svd(M)
+	#return a.reshape(3, 3)
+	print vt
+	print s
+	print vt.shape
+	#Here we are manually selecting the vector in VT by comparing the S values
+	homographyMatrix = vt[-1].reshape(3, 3)
+	# print homographyMatrix.shape
+	# print homographyMatrix[0]
+	# print homographyMatrix[2]
+	# print homographyMatrix[2, 2]
+	# print 'homo is: ', homographyMatrix[2, 2]
+	normalizeValue = 1.0 / homographyMatrix[2, 2]
+	return homographyMatrix * normalizeValue
 
 if (__name__ == "__main__"):
 
@@ -197,11 +211,11 @@ if (__name__ == "__main__"):
 	### part 3 ###
 	paramPointList = []
 	paramImagePointList = []
-	paramPointList.append(pts[0][:2])
-	paramPointList.append(pts[1][:2])
-	paramPointList.append(pts[2][:2])
-	paramPointList.append(pts[3][:2])
-	paramPointList.append(pts[8][:2])
+	paramPointList.append(pts[0][:2].tolist())
+	paramPointList.append(pts[1][:2].tolist())
+	paramPointList.append(pts[2][:2].tolist())
+	paramPointList.append(pts[3][:2].tolist())
+	paramPointList.append(pts[8][:2].tolist())
 
 	paramImagePointList.append([np.float(perspectivePlotX[2][0]), np.float(perspectivePlotY[2][0])])
 	paramImagePointList.append([np.float(perspectivePlotX[2][1]), np.float(perspectivePlotY[2][1])])
