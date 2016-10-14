@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import numpy.linalg as la
 
 def quatmult(q1, q2):
 	out = [0, 0, 0, 0]
@@ -50,11 +51,12 @@ def projection(type, sp, tf, cf):
 		ufp = f * np.dot(sp - tf, cf[:,0]) * bu / np.dot(sp - tf, cf[:,2]) + u0
 		vfp = f * np.dot(sp - tf, cf[:,1]) * bu / np.dot(sp - tf, cf[:,2]) + v0
 	else:
+		# ufp = np.dot(sp - tf, cf[0].T) * bu + u0
+		# vfp = np.dot(sp - tf, cf[1].T) * bu + v0
 		ufp = np.dot(sp - tf, cf[:,0]) * bu + u0
 		vfp = np.dot(sp - tf, cf[:,1]) * bu + v0
 	# print np.float(ufp), np.float(vfp)
 	return np.float(ufp), np.float(vfp)
-	#return ufp, vfp
 
 def drawProjections(XValueSet, YValueSet, identifier):
 	fig = plt.figure()
@@ -67,6 +69,23 @@ def drawProjections(XValueSet, YValueSet, identifier):
 	plt.savefig(identifier + '.jpg')
 	plt.close()
 	return
+
+def computeHomography(pPoints, cPoints):
+	b = [0] * (len(pPoints) * 2)
+	M = []
+	for index in range(0, len(pPoints)):
+		up = np.float(pPoints[index][0])
+		vp = np.float(pPoints[index][1])
+		uc = np.float(cPoints[index][0])
+		vc = np.float(cPoints[index][1])
+		M.append([up, vp, 1, 0, 0, 0, -uc*up, -uc*vp, -uc])
+		M.append([0, 0, 0, up, vp, 1, -vc*up, -vc*vp, -vc])
+	b = np.asmatrix(b).reshape(len(b), 1)
+	M = np.asmatrix(M)
+	print 'M is: ', M
+	a, e, r, s = la.lstsq(M, b)
+	#a = la.solve(M, b) cannot be used here, as solve can only be used for square matrix M
+	return a.reshape(3, 3)
 
 if (__name__ == "__main__"):
 
@@ -197,5 +216,21 @@ if (__name__ == "__main__"):
 	drawProjections(orthographicPlotX, orthographicPlotY, 'orthographic')
 
 	### part 3 ###
+	paramPointList = []
+	paramImagePointList = []
+	paramPointList.append(pts[0][:2])
+	paramPointList.append(pts[1][:2])
+	paramPointList.append(pts[2][:2])
+	paramPointList.append(pts[3][:2])
+	paramPointList.append(pts[8][:2])
+
+	paramImagePointList.append([np.float(perspectivePlotX[2][0]), np.float(perspectivePlotY[2][0])])
+	paramImagePointList.append([np.float(perspectivePlotX[2][1]), np.float(perspectivePlotY[2][1])])
+	paramImagePointList.append([np.float(perspectivePlotX[2][2]), np.float(perspectivePlotY[2][2])])
+	paramImagePointList.append([np.float(perspectivePlotX[2][3]), np.float(perspectivePlotY[2][3])])
+	paramImagePointList.append([np.float(perspectivePlotX[2][8]), np.float(perspectivePlotY[2][8])])
+
+	homographyMatrix = computeHomography(paramPointList, paramImagePointList)
+	print homographyMatrix
 
 	pass
