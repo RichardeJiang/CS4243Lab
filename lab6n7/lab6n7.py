@@ -37,17 +37,35 @@ def projection(type, sp, tf, cf):
 	bu = 1.0
 	bv = 1.0
 	f = 1.0
-	sp = np.asarray(sp).reshape(3, 1)
-	tf = np.asarray(tf).reshape(3, 1)
+	# sp = np.asarray(sp).reshape(3, 1)
+	# tf = np.asarray(tf).reshape(3, 1)
+	sp = np.asarray(sp)
+	tf = np.asarray(tf)
+	# print sp
+	# print tf
+	# print cf[0]
 	if type == 'perspective':
-		ufp = f * np.dot(sp - tf, cf[0]) * bu / np.dot(sp - tf, cf[2]) + u0
-		vfp = f * np.dot(sp - tf, cf[1]) * bu / np.dot(sp - tf, cf[2]) + v0
+		# ufp = f * np.dot(sp - tf, cf[0].T) * bu / np.dot(sp - tf, cf[2].T) + u0
+		# vfp = f * np.dot(sp - tf, cf[1].T) * bu / np.dot(sp - tf, cf[2].T) + v0
+		ufp = f * np.dot(sp - tf, cf[:,0]) * bu / np.dot(sp - tf, cf[:,2]) + u0
+		vfp = f * np.dot(sp - tf, cf[:,1]) * bu / np.dot(sp - tf, cf[:,2]) + v0
 	else:
-		ufp = f * np.dot(sp - tf, cf[0]) * bu + u0
-		vfp = f * np.dot(sp - tf, cf[1]) * bu + v0
-	return ufp, vfp
+		ufp = np.dot(sp - tf, cf[:,0]) * bu + u0
+		vfp = np.dot(sp - tf, cf[:,1]) * bu + v0
+	# print np.float(ufp), np.float(vfp)
+	return np.float(ufp), np.float(vfp)
+	#return ufp, vfp
 
-def drawProjections():
+def drawProjections(XValueSet, YValueSet, identifier):
+	fig = plt.figure()
+
+	for index in range(0, len(XValueSet)):
+		sub = fig.add_subplot(2, 2, index+1)
+		print XValueSet[index]
+		print YValueSet[index]
+		sub.plot(XValueSet[index], YValueSet[index], 'ro')
+	plt.savefig(identifier + '.jpg')
+	plt.close()
 	return
 
 if (__name__ == "__main__"):
@@ -70,6 +88,7 @@ if (__name__ == "__main__"):
 	theta = -np.pi / 6.0
 	initialPos = [0, 0, -5]
 	q, qp = computeQnQp(theta)
+	print q
 	initialPos = [0] + initialPos
 
 	frame2 = quatmult(q, initialPos)
@@ -97,39 +116,86 @@ if (__name__ == "__main__"):
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
 	print quatmat_1
-	rotationMatrix = quat2rot(normalizeVector(q))
+	print q
+	print normalizeVector(q)
+	#rotationMatrix = quat2rot(normalizeVector(q))
+	rotationMatrix = quat2rot(q)
 
-	quatmat_2 = rotationMatrix * quatmat_1
-	quatmat_3 = rotationMatrix * quatmat_2
-	quatmat_4 = rotationMatrix * quatmat_3
+	print rotationMatrix
+
+	quatmat_2 = np.dot(rotationMatrix, quatmat_1)
+	quatmat_3 = np.dot(rotationMatrix, quatmat_2)
+	quatmat_4 = np.dot(rotationMatrix, quatmat_3)
+
+	print quatmat_2
+	print quatmat_3
+	print quatmat_4
 
 
 	# theta = 0
 	# q, qp = computeQnQp(theta)
-	# quatmat_1 = quat2rot(normalizeVector(q))
+	# quatmat_1 = quat2rot(q)
 	# print quatmat_1
 
 	# theta = np.pi / 6.0
 	# q, qp = computeQnQp(theta)
-	# quatmat_2 = quat2rot(normalizeVector(q))
+	# quatmat_2 = quat2rot(q)
+	# print quatmat_2
 
 	# theta = theta * 2
 	# q, qp = computeQnQp(theta)
-	# quatmat_3 = quat2rot(normalizeVector(q))
+	# quatmat_3 = quat2rot(q)
+	# print quatmat_3
 
 	# theta = theta * 1.5
 	# q, qp = computeQnQp(theta)
-	# quatmat_4 = quat2rot(normalizeVector(q))
+	# quatmat_4 = quat2rot(q)
+	# print quatmat_4
 
 	### part 2 ###
-	for point in pts:
-		projection('perspective', point, initialPos[1:], quatmat_1)
-		projection('perspective', point, frame2[1:], quatmat_2)
-		projection('perspective', point, frame3[1:], quatmat_3)
-		projection('perspective', point, frame4[1:], quatmat_4)
+	perspectivePlotX = []
+	perspectivePlotY = []
+	orthographicPlotX = []
+	orthographicPlotY = []
 
-		projection('orthographic', point, initialPos[1:], quatmat_1)
-		projection('orthographic', point, frame2[1:], quatmat_2)
-		projection('orthographic', point, frame3[1:], quatmat_3)
-		projection('orthographic', point, frame4[1:], quatmat_4)
+	#sth worth noting here:
+	#in Python, when we append to list in this way:
+	#u=sth, and then list.append(u)
+	#after that, u=sth else, and again list.append(u)
+	#then in the end all elements in list will be the same
+	#since 
+	for point in pts:
+		u = range(0, 4)
+		v = range(0, 4)
+		u[0], v[0] = projection('perspective', point, initialPos[1:], quatmat_1)
+		u[1], v[1] = projection('perspective', point, frame2[1:], quatmat_2)
+		u[2], v[2] = projection('perspective', point, frame3[1:], quatmat_3)
+		u[3], v[3] = projection('perspective', point, frame4[1:], quatmat_4)
+		print 'u is: ', u
+		print 'v is: ', v
+		perspectivePlotX.append(u)
+		perspectivePlotY.append(v)
+		print 'curr X is: ', perspectivePlotX
+		print 'curr Y is: ', perspectivePlotY
+
+		u[0], v[0] = projection('orthographic', point, initialPos[1:], quatmat_1)
+		u[1], v[1] = projection('orthographic', point, frame2[1:], quatmat_2)
+		u[2], v[2] = projection('orthographic', point, frame3[1:], quatmat_3)
+		u[3], v[3] = projection('orthographic', point, frame4[1:], quatmat_4)
+		orthographicPlotX.append(u)
+		orthographicPlotY.append(v)
+
+	print 'X value is: ', perspectivePlotX
+	print 'Y value is: ', perspectivePlotY
+
+	perspectivePlotX = np.asarray(perspectivePlotX).T.tolist()
+	perspectivePlotY = np.asarray(perspectivePlotY).T.tolist()
+	orthographicPlotX = np.asarray(orthographicPlotX).T.tolist()
+	orthographicPlotY = np.asarray(orthographicPlotY).T.tolist()
+
+	drawProjections(perspectivePlotX, perspectivePlotY, 'perspective')
+	drawProjections(orthographicPlotX, orthographicPlotY, 'orthographic')
+
+	### part 3 ###
+
 	pass
