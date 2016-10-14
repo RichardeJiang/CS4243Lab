@@ -81,7 +81,7 @@ def computeHomography(pPoints, cPoints):
 	M = np.asmatrix(M)
 	print 'M is: ', M
 	np.savetxt('M.txt', M)
-	# a, e, r, s = la.lstsq(M, b)
+	# a, e, r, s = la.lstsq(M, b) also cannot be used here, should be using SVD to solve for homogeneous
 	#a = la.solve(M, b) cannot be used here, as solve can only be used for square matrix M
 	u, s, vt = la.svd(M)
 	#return a.reshape(3, 3)
