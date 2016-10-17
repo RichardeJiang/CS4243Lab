@@ -20,9 +20,9 @@ def computeQnQp(theta):
 	qp = [np.cos(theta / 2.0)] + [-element for element in vq.tolist()]
 	return q, qp
 
-# got some problems with this; don't submit first
 def normalizeVector(q):
-	size = np.sqrt(reduce(lambda x, y: x**2 + y**2, q))
+	#a note here: lambda x, y: x**2 + y**2 gives (1^2+2^2)^2+3^2, not the sum of square
+	size = np.sqrt(np.sum(map(lambda x: x**2, q)))
 	return [ele/size for ele in q]
 
 def quat2rot(q):
@@ -142,10 +142,9 @@ if (__name__ == "__main__"):
 	quatmat_1 = np.matrix(quatmat_1)
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
-	#rotationMatrix = quat2rot(normalizeVector(q))
+	rotationMatrix = quat2rot(normalizeVector(q))
 	print 'q is: ', q
 	print 'normalized q is: ', normalizeVector(q)
-	rotationMatrix = quat2rot(q)
 
 	quatmat_2 = np.dot(rotationMatrix, quatmat_1.T).T
 	quatmat_3 = np.dot(rotationMatrix, quatmat_2.T).T
