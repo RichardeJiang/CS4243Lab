@@ -20,6 +20,7 @@ def computeQnQp(theta):
 	qp = [np.cos(theta / 2.0)] + [-element for element in vq.tolist()]
 	return q, qp
 
+# got some problems with this; don't submit first
 def normalizeVector(q):
 	size = np.sqrt(reduce(lambda x, y: x**2 + y**2, q))
 	return [ele / size for ele in q]
@@ -42,16 +43,22 @@ def projection(type, sp, tf, cf):
 	# tf = np.asarray(tf).reshape(3, 1)
 	sp = np.asarray(sp)
 	tf = np.asarray(tf)
+	# print sp
+	# print sp.shape
+	# sp=sp.reshape(1, 3)
+	# print sp
+	# print sp.shape
 	if type == 'perspective':
-		# ufp = f * np.dot(sp - tf, cf[0].T) * bu / np.dot(sp - tf, cf[2].T) + u0
-		# vfp = f * np.dot(sp - tf, cf[1].T) * bu / np.dot(sp - tf, cf[2].T) + v0
-		ufp = f * np.dot(sp - tf, cf[:,0]) * bu / np.dot(sp - tf, cf[:,2]) + u0
-		vfp = f * np.dot(sp - tf, cf[:,1]) * bu / np.dot(sp - tf, cf[:,2]) + v0
+		print 'dot value is: ', np.dot(sp-tf, cf[0].T)
+		ufp = f * np.dot(sp - tf, cf[0].T) * bu / np.dot(sp - tf, cf[2].T) + u0
+		vfp = f * np.dot(sp - tf, cf[1].T) * bv / np.dot(sp - tf, cf[2].T) + v0
+		# ufp = f * np.dot(sp - tf, cf[:,0]) * bu / np.dot(sp - tf, cf[:,2]) + u0
+		# vfp = f * np.dot(sp - tf, cf[:,1]) * bu / np.dot(sp - tf, cf[:,2]) + v0
 	else:
-		# ufp = np.dot(sp - tf, cf[0].T) * bu + u0
-		# vfp = np.dot(sp - tf, cf[1].T) * bu + v0
-		ufp = np.dot(sp - tf, cf[:,0]) * bu + u0
-		vfp = np.dot(sp - tf, cf[:,1]) * bu + v0
+		ufp = np.dot(sp - tf, cf[0].T) * bu + u0
+		vfp = np.dot(sp - tf, cf[1].T) * bv + v0
+		# ufp = np.dot(sp - tf, cf[:,0]) * bu + u0
+		# vfp = np.dot(sp - tf, cf[:,1]) * bu + v0
 	# print np.float(ufp), np.float(vfp)
 	return np.float(ufp), np.float(vfp)
 
@@ -59,8 +66,15 @@ def drawProjections(XValueSet, YValueSet, identifier):
 	fig = plt.figure()
 
 	for index in range(0, len(XValueSet)):
+		maxX = np.amax(XValueSet[index])
+		minX = np.amin(XValueSet[index])
+		maxY = np.amax(YValueSet[index])
+		minY = np.amin(YValueSet[index])
+		lenX = maxX - minX
+		lenY = maxY - minY
 		sub = fig.add_subplot(2, 2, index+1)
-		sub.plot(XValueSet[index], YValueSet[index], 'ro')
+		sub.plot(XValueSet[index], YValueSet[index], 'bo')
+		sub.axis([minX - 0.1 * lenX, maxX + 0.1 * lenX, minY  - 0.1 * lenY, maxY + 0.1 * lenY])
 	plt.savefig(identifier + '.jpg')
 	plt.close()
 	return
@@ -68,7 +82,6 @@ def drawProjections(XValueSet, YValueSet, identifier):
 def computeHomography(pPoints, cPoints):
 	print 'pPoint is: ', pPoints
 	print 'cPoint is: ', cPoints
-	b = [0] * (len(pPoints) * 2)
 	M = []
 	for index in range(0, len(pPoints)):
 		up = np.float(pPoints[index][0])
@@ -77,25 +90,20 @@ def computeHomography(pPoints, cPoints):
 		vc = np.float(cPoints[index][1])
 		M.append([up, vp, 1, 0, 0, 0, -uc*up, -uc*vp, -uc])
 		M.append([0, 0, 0, up, vp, 1, -vc*up, -vc*vp, -vc])
-	b = np.asmatrix(b).reshape(len(b), 1)
 	M = np.asmatrix(M)
 	print 'M is: ', M
-	np.savetxt('M.txt', M)
 	# a, e, r, s = la.lstsq(M, b) also cannot be used here, should be using SVD to solve for homogeneous
 	#a = la.solve(M, b) cannot be used here, as solve can only be used for square matrix M
 	u, s, vt = la.svd(M)
-	#return a.reshape(3, 3)
 	print vt
 	print s
 	print vt.shape
 	#Here we are manually selecting the vector in VT by comparing the S values
 	homographyMatrix = vt[-1].reshape(3, 3)
-	# print homographyMatrix.shape
-	# print homographyMatrix[0]
-	# print homographyMatrix[2]
-	# print homographyMatrix[2, 2]
-	# print 'homo is: ', homographyMatrix[2, 2]
-	normalizeValue = 1.0 / homographyMatrix[2, 2]
+	normalizeValue = 1.0 / homographyMatrix[2, 2] #canot use homo[2][2] for this; see stackoverflow for it
+	floatFormatter = lambda x: "%.4f" % x
+	np.set_printoptions(formatter={'float_kind':floatFormatter}) #for printing purposes
+	#return np.around(homographyMatrix * normalizeValue, decimals=4)
 	return homographyMatrix * normalizeValue
 
 if (__name__ == "__main__"):
@@ -137,6 +145,11 @@ if (__name__ == "__main__"):
 	frame4 = quatmult(frame4, qp)
 	frame4[0] = 0
 
+	print initialPos
+	print frame2
+	print frame3
+	print frame4
+
 	### part 1.3 ###
 	### this part is not implemented correctly according to pdf requirement ###
 	quatmat_1 = np.array([(1.0, 0, 0), (0, 1.0, 0), (0, 0, 1.0)])
@@ -146,11 +159,11 @@ if (__name__ == "__main__"):
 	#rotationMatrix = quat2rot(normalizeVector(q))
 	rotationMatrix = quat2rot(q)
 
-	quatmat_2 = np.dot(rotationMatrix, quatmat_1)
-	quatmat_3 = np.dot(rotationMatrix, quatmat_2)
-	quatmat_4 = np.dot(rotationMatrix, quatmat_3)
+	quatmat_2 = np.dot(rotationMatrix, quatmat_1.T).T
+	quatmat_3 = np.dot(rotationMatrix, quatmat_2.T).T
+	quatmat_4 = np.dot(rotationMatrix, quatmat_3.T).T
 
-
+	### just a second way of doing it ###
 	# theta = 0
 	# q, qp = computeQnQp(theta)
 	# quatmat_1 = quat2rot(q)
@@ -182,23 +195,25 @@ if (__name__ == "__main__"):
 	#u=sth, and then list.append(u)
 	#after that, u=sth else, and again list.append(u)
 	#then in the end all elements in list will be the same
-	#since 
+	#since it seems that it's appending the reference actually
 	for point in pts:
-		u = range(0, 4)
-		v = range(0, 4)
-		u[0], v[0] = projection('perspective', point, initialPos[1:], quatmat_1)
-		u[1], v[1] = projection('perspective', point, frame2[1:], quatmat_2)
-		u[2], v[2] = projection('perspective', point, frame3[1:], quatmat_3)
-		u[3], v[3] = projection('perspective', point, frame4[1:], quatmat_4)
-		perspectivePlotX.append(u)
-		perspectivePlotY.append(v)
+		up = range(0, 4)
+		vp = range(0, 4)
+		up[0], vp[0] = projection('perspective', point, initialPos[1:], quatmat_1)
+		up[1], vp[1] = projection('perspective', point, frame2[1:], quatmat_2)
+		up[2], vp[2] = projection('perspective', point, frame3[1:], quatmat_3)
+		up[3], vp[3] = projection('perspective', point, frame4[1:], quatmat_4)
+		perspectivePlotX.append(up)
+		perspectivePlotY.append(vp)
 
-		u[0], v[0] = projection('orthographic', point, initialPos[1:], quatmat_1)
-		u[1], v[1] = projection('orthographic', point, frame2[1:], quatmat_2)
-		u[2], v[2] = projection('orthographic', point, frame3[1:], quatmat_3)
-		u[3], v[3] = projection('orthographic', point, frame4[1:], quatmat_4)
-		orthographicPlotX.append(u)
-		orthographicPlotY.append(v)
+		uo = range(0, 4)
+		vo = range(0, 4)
+		uo[0], vo[0] = projection('orthographic', point, initialPos[1:], quatmat_1)
+		uo[1], vo[1] = projection('orthographic', point, frame2[1:], quatmat_2)
+		uo[2], vo[2] = projection('orthographic', point, frame3[1:], quatmat_3)
+		uo[3], vo[3] = projection('orthographic', point, frame4[1:], quatmat_4)
+		orthographicPlotX.append(uo)
+		orthographicPlotY.append(vo)
 
 	perspectivePlotX = np.asarray(perspectivePlotX).T.tolist()
 	perspectivePlotY = np.asarray(perspectivePlotY).T.tolist()
@@ -225,5 +240,6 @@ if (__name__ == "__main__"):
 
 	homographyMatrix = computeHomography(paramPointList, paramImagePointList)
 	print homographyMatrix
+	np.savetxt('homography matrix.txt', homographyMatrix, fmt='%.4f')
 
 	pass
