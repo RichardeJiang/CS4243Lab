@@ -23,7 +23,7 @@ def computeQnQp(theta):
 # got some problems with this; don't submit first
 def normalizeVector(q):
 	size = np.sqrt(reduce(lambda x, y: x**2 + y**2, q))
-	return [ele / size for ele in q]
+	return [ele/size for ele in q]
 
 def quat2rot(q):
 	rotationM = []
@@ -39,17 +39,10 @@ def projection(type, sp, tf, cf):
 	bu = 1.0
 	bv = 1.0
 	f = 1.0
-	# sp = np.asarray(sp).reshape(3, 1)
-	# tf = np.asarray(tf).reshape(3, 1)
 	sp = np.asarray(sp)
 	tf = np.asarray(tf)
-	# print sp
-	# print sp.shape
-	# sp=sp.reshape(1, 3)
-	# print sp
-	# print sp.shape
+	
 	if type == 'perspective':
-		print 'dot value is: ', np.dot(sp-tf, cf[0].T)
 		ufp = f * np.dot(sp - tf, cf[0].T) * bu / np.dot(sp - tf, cf[2].T) + u0
 		vfp = f * np.dot(sp - tf, cf[1].T) * bv / np.dot(sp - tf, cf[2].T) + v0
 		# ufp = f * np.dot(sp - tf, cf[:,0]) * bu / np.dot(sp - tf, cf[:,2]) + u0
@@ -59,7 +52,6 @@ def projection(type, sp, tf, cf):
 		vfp = np.dot(sp - tf, cf[1].T) * bv + v0
 		# ufp = np.dot(sp - tf, cf[:,0]) * bu + u0
 		# vfp = np.dot(sp - tf, cf[:,1]) * bu + v0
-	# print np.float(ufp), np.float(vfp)
 	return np.float(ufp), np.float(vfp)
 
 def drawProjections(XValueSet, YValueSet, identifier):
@@ -91,13 +83,11 @@ def computeHomography(pPoints, cPoints):
 		M.append([up, vp, 1, 0, 0, 0, -uc*up, -uc*vp, -uc])
 		M.append([0, 0, 0, up, vp, 1, -vc*up, -vc*vp, -vc])
 	M = np.asmatrix(M)
-	print 'M is: ', M
 	# a, e, r, s = la.lstsq(M, b) also cannot be used here, should be using SVD to solve for homogeneous
 	#a = la.solve(M, b) cannot be used here, as solve can only be used for square matrix M
 	u, s, vt = la.svd(M)
 	print vt
 	print s
-	print vt.shape
 	#Here we are manually selecting the vector in VT by comparing the S values
 	homographyMatrix = vt[-1].reshape(3, 3)
 	normalizeValue = 1.0 / homographyMatrix[2, 2] #canot use homo[2][2] for this; see stackoverflow for it
@@ -146,17 +136,15 @@ if (__name__ == "__main__"):
 	frame4[0] = 0
 
 	print initialPos
-	print frame2
-	print frame3
-	print frame4
 
 	### part 1.3 ###
-	### this part is not implemented correctly according to pdf requirement ###
 	quatmat_1 = np.array([(1.0, 0, 0), (0, 1.0, 0), (0, 0, 1.0)])
 	quatmat_1 = np.matrix(quatmat_1)
 	theta = np.pi / 6.0
 	q, qp = computeQnQp(theta)
 	#rotationMatrix = quat2rot(normalizeVector(q))
+	print 'q is: ', q
+	print 'normalized q is: ', normalizeVector(q)
 	rotationMatrix = quat2rot(q)
 
 	quatmat_2 = np.dot(rotationMatrix, quatmat_1.T).T
